@@ -1,0 +1,19 @@
+# Local environment / secrets
+.env
+
+# Landing area for raw SD backups (data, never versioned)
+landing/
+data/
+
+# Database / Grafana / backup volumes if bind-mounted locally
+pgdata/
+backups/
+grafana-data/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/

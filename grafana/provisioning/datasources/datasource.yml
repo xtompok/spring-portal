@@ -1,0 +1,18 @@
+apiVersion: 1
+
+datasources:
+  - name: Skalna
+    uid: skalna-pg
+    type: postgres
+    access: proxy
+    url: ${DS_DB_HOST}
+    user: ${DS_DB_USER}
+    isDefault: true
+    jsonData:
+      database: ${DS_DB_NAME}
+      sslmode: disable
+      postgresVersion: 1600
+      timescaledb: true
+    secureJsonData:
+      password: ${DS_DB_PASSWORD}
+    editable: true

@@ -1,0 +1,21 @@
+[project]
+name = "skalna-portal"
+version = "0.1.0"
+description = "Ingestion, weather scraping and flow derivation for the Skalná water-spring data portal"
+requires-python = ">=3.10"
+dependencies = [
+    "click>=8.1",
+    "psycopg2-binary>=2.9",
+    "requests>=2.31",
+    "beautifulsoup4>=4.12",
+]
+
+[project.scripts]
+portal = "portal.cli:cli"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["portal*"]
