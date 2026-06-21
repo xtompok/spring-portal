@@ -4,6 +4,12 @@
 # Scrape recent weather every day at 06:15 UTC.
 15 6 * * *   portal weather fetch-recent --days 3
 
+# Ingest freshly-rsynced station uploads so the router's cursor (max(time)) stays
+# fresh before the next daily session. Each session lands in /landing/<utc-date>/
+# (a numbered-dir backup tree); re-load only recently-touched session dirs — older
+# ones are already ingested and re-loading is idempotent via (time, uptime).
+45 * * * *   find /landing -mindepth 1 -maxdepth 1 -type d -mtime -2 -exec portal load {} \;
+
 # Recompute the derived flow series nightly (cheap; derived data).
 30 2 * * *   portal flow rebuild
 
