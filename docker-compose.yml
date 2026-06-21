@@ -59,7 +59,10 @@ services:
   scheduler:
     build: .
     image: skalna-portal:latest
-    command: ["supercronic", "/app/scheduler/crontab"]
+    # Override the image ENTRYPOINT (["portal"]) so this service runs supercronic
+    # directly — otherwise it becomes `portal supercronic ...` and fails.
+    entrypoint: ["supercronic"]
+    command: ["/app/scheduler/crontab"]
     environment:
       DATABASE_URL: ${DATABASE_URL}
       WEATHER_STATION: ${WEATHER_STATION}
