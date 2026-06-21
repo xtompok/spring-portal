@@ -7,7 +7,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - pgdata:/var/lib/postgresql/data
-    ports:
+#    ports:
       # Bound to localhost only — reach it from the laptop / via SSH tunnel.
 #      - "127.0.0.1:5432:5432"
     healthcheck:
