@@ -92,7 +92,7 @@
         "y": 0
       },
       "id": 1,
-      "interval": "1s",
+      "interval": "15m",
       "maxDataPoints": 2000,
       "options": {
         "legend": {
@@ -370,6 +370,5 @@
   "timezone": "Europe/Prague",
   "title": "Skalná — Spring science",
   "uid": "skalna-science",
-  "version": 9,
   "weekStart": ""
 }
