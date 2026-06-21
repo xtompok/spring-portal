@@ -64,6 +64,9 @@ services:
     entrypoint: ["supercronic"]
     command: ["/app/scheduler/crontab"]
     environment:
+      # supercronic runs jobs via the login shell from /etc/passwd (root -> /bin/bash),
+      # which the slim image lacks. Force /bin/sh so fork-exec succeeds.
+      SHELL: /bin/sh
       DATABASE_URL: ${DATABASE_URL}
       WEATHER_STATION: ${WEATHER_STATION}
       WEATHER_SOURCE: ${WEATHER_SOURCE}
