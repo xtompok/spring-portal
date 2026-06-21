@@ -33,7 +33,7 @@ services:
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
     ports:
-      - "127.0.0.1:3002:3000"
+      - "0.0.0.0:3002:3000"
     depends_on:
       db:
         condition: service_healthy
@@ -61,7 +61,11 @@ services:
     image: skalna-portal:latest
     # Override the image ENTRYPOINT (["portal"]) so this service runs supercronic
     # directly — otherwise it becomes `portal supercronic ...` and fails.
-    entrypoint: ["supercronic"]
+    # Must be an ABSOLUTE path: supercronic runs as PID 1 and its reaper re-execs
+    # argv[0] via syscall.ForkExec, which does no PATH lookup. A bare "supercronic"
+    # makes the reaper fail with "Failed to fork exec: no such file or directory"
+    # and crash-loop (supercronic bug aptible/supercronic#177, present in v0.2.33).
+    entrypoint: ["/usr/local/bin/supercronic"]
     command: ["/app/scheduler/crontab"]
     environment:
       # supercronic runs jobs via the login shell from /etc/passwd (root -> /bin/bash),
