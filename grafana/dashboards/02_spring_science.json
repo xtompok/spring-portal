@@ -83,7 +83,39 @@
           },
           "unit": "lpm"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "water column (tube - air)"
+            },
+            "properties": [
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "water column: tube - air (hPa)"
+              },
+              {
+                "id": "unit",
+                "value": "pressurehpa"
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 12
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -112,6 +144,11 @@
           "format": "time_series",
           "rawSql": "SELECT time_bucket('$__interval', time) AS \"time\", avg(flow_l_per_min) AS value FROM v_flow WHERE $__timeFilter(time) AND valid GROUP BY 1 ORDER BY 1",
           "refId": "A"
+        },
+        {
+          "format": "time_series",
+          "rawSql": "SELECT time_bucket('$__interval', time) AS \"time\", 'water column (tube - air)' AS metric, (avg(pressure_kpa) FILTER (WHERE placement = 'spring_tube') - avg(pressure_kpa) FILTER (WHERE placement = 'air')) * 10 AS value FROM baro WHERE placement IN ('air','spring_tube') AND $__timeFilter(time) GROUP BY 1 ORDER BY 1",
+          "refId": "B"
         }
       ],
       "title": "Flow rate",
@@ -348,9 +385,127 @@
           "format": "time_series",
           "rawSql": "SELECT time_bucket('$__interval', time) AS \"time\", COALESCE(location_name, address) AS metric, avg(temp_c) AS value FROM v_thermo WHERE $__timeFilter(time) GROUP BY 1, 2 ORDER BY 1",
           "refId": "A"
+        },
+        {
+          "format": "time_series",
+          "rawSql": "SELECT time_bucket('$__interval', time) AS \"time\", placement || ' (baro logger)' AS metric, avg(temperature_c) AS value FROM baro WHERE $__timeFilter(time) GROUP BY 1, 2 ORDER BY 1",
+          "refId": "B"
         }
       ],
       "title": "Water temperature by location",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "skalna-pg"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "pressurehpa"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Cheb station (sea-level)"
+            },
+            "properties": [
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [
+                    10,
+                    10
+                  ],
+                  "fill": "dash"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 25
+      },
+      "id": 4,
+      "interval": "15m",
+      "maxDataPoints": 2000,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.3.0",
+      "targets": [
+        {
+          "format": "time_series",
+          "rawSql": "SELECT time_bucket('$__interval', time) AS \"time\", placement || ' (logger)' AS metric, avg(pressure_kpa) * 10 AS value FROM baro WHERE $__timeFilter(time) GROUP BY 1, 2 ORDER BY 1",
+          "refId": "A"
+        },
+        {
+          "format": "time_series",
+          "rawSql": "SELECT time_bucket('$__interval', time) AS \"time\", 'Cheb station (sea-level)' AS metric, avg(pressure_hpa) AS value FROM weather WHERE $__timeFilter(time) GROUP BY 1 ORDER BY 1",
+          "refId": "B"
+        }
+      ],
+      "title": "Absolute pressure: barologgers vs Cheb (loggers read local altitude; Cheb is sea-level-corrected — compare variation, not level)",
       "type": "timeseries"
     }
   ],

@@ -23,6 +23,7 @@ is shaped the way it is; the code implements it.
 |----------|------------------------------------------|----------------------------------|----------|
 | `lab`    | ReProBox firmware, SD-card `.TXT` files  | file-drop landing → loader CLI   | active   |
 | `weather`| in-pocasi.cz archive (station `cheb`)    | `portal weather fetch` → direct  | active   |
+| `baro`   | submersible barologgers (CSV export)     | `portal baro load-csv` → direct  | active   |
 | `seismic`| local seismic lab                        | TBD                              | future   |
 
 ## Platform
@@ -114,6 +115,29 @@ derived layer.
   *structurally* unparseable (wrong field count for the detected version, non-numeric
   in a numeric column) and then goes to a **`quarantine`** table with the raw line +
   reason — nothing is silently lost.
+
+### Barologgers
+
+Two submersible loggers downloaded as CSV: one in open **air** (the "BARO" atmospheric
+reference) and one in the **spring tube**. Each reports absolute pressure (kPa) and
+temperature (deg C) half-hourly. Like weather, the export is already clean so it goes
+**straight to the table** (`portal baro load-csv`), bypassing the file-drop loader.
+
+- **Schema:** one `baro` hypertable, long by `placement` (`air` | `spring_tube`),
+  mirroring weather's source/station/time shape — a third logger is then free. Raw is
+  sacred: any derived water level (`spring_tube` − `air` → water column) is a downstream
+  view, not stored. *(Not built — only raw pressure/temp are stored/plotted for now.)*
+- **Placement** is auto-detected from the filename (`BARO` in the name → `air`, else
+  `spring_tube`); ambiguous/non-CSV names fail loud. The header `Serial_number:` is
+  stored for provenance and, for known loggers, cross-checked against the filename guess.
+- **Time:** logger wall-time is Europe/Prague → UTC at ingest (same as weather; the DST
+  fall-back hour collides two local readings onto one UTC instant → deduped in-batch).
+- **Idempotency:** `UNIQUE(placement, time)`, `ON CONFLICT DO UPDATE` (re-downloading an
+  overlapping export is a no-op / clean correction).
+- **Presentation:** folded into the **Spring science** dashboard — logger temperatures
+  join the water-temperature panel; a pressure panel overlays both loggers (converted
+  kPa→hPa) against the Cheb weather pressure (loggers read true local altitude, Cheb is
+  sea-level-corrected, so compare the *variation*, not the absolute level).
 
 ### Idempotency / dedup
 

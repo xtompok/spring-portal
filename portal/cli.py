@@ -6,6 +6,7 @@ from datetime import date
 
 import click
 
+from . import baro as baro_mod
 from . import flow as flow_mod
 from . import load as load_mod
 from . import migrate as migrate_mod
@@ -72,6 +73,29 @@ def weather_fetch_recent(days, station, source):
 def weather_load_csv(csv_path, station, source):
     """Backfill weather from an existing download_weather.py CSV."""
     weather_mod.load_csv(csv_path, station, source, echo=click.echo)
+
+
+@cli.group()
+def baro():
+    """Barologger pressure/temperature ingestion."""
+
+
+@baro.command("load-csv")
+@click.argument("csv_paths", nargs=-1, required=True,
+                type=click.Path(exists=True, dir_okay=False))
+def baro_load_csv(csv_paths):
+    """Load one or more barologger CSV exports into `baro` (idempotent).
+
+    Placement is auto-detected from the filename: a name containing 'BARO' (any
+    case) is the open-air reference logger and stored as placement 'air'; any other
+    name is taken as the in-tube logger ('spring_tube'). An ambiguous/non-CSV name
+    is a hard error. The serial in the file header is stored for provenance and, for
+    known loggers, cross-checked against the filename guess (mismatch -> warning).
+
+    Times are Europe/Prague wall-time, converted to UTC on ingest.
+    """
+    for p in csv_paths:
+        baro_mod.load_csv(p, echo=click.echo)
 
 
 @cli.command("session-info")
